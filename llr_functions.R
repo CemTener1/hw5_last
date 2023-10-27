@@ -4,18 +4,39 @@ llr=function(x,y,z,omega){
 }
 
 compute_f_hat=function(z,x,y,omega){
-  Wz=make_weight_matrix(omega, x, z) 
+  Wz = make_weight_matrix(x, z, omega)
   X=make_predictor_matrix(x) 
   f_hat=c(1,z)%*%solve(t(X)%*%Wz%*%X)%*%t(X)%*%Wz%*%y 
   return(f_hat) 
 }
 
-make_weight_matrix <- function(omega, x, z){
+make_weight_matrix <- function(x, z, omega){
   r = abs(x-z) / omega
   W = ifelse(abs(r)<1, (1-abs(r)^3)^3, 0)
   
   return(diag(W))
 }
+
+llr_new=function(x,y,z,omega){
+  fits=sapply(z,compute_f_hat_y,x,y,omega) 
+  return(fits) 
+}
+
+compute_f_hat_y=function(z,x,y,omega){
+  Wz = make_weight_matrix_y(x, z, omega)
+  X=make_predictor_matrix(x) 
+  f_hat = c(1, z) %*% solve(t(X) %*% (Wz * X)) %*% t(X) %*% (Wz * y)
+  return(f_hat) 
+}
+
+make_weight_matrix_y <- function(x, z, omega){
+  r = abs(x-z) / omega
+  W = ifelse(abs(r)<1, (1-abs(r)^3)^3, 0)
+  
+  return((W))
+}
+
+
 
 make_predictor_matrix <- function(x){
   X <- cbind(1,x)
